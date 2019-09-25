@@ -27,6 +27,8 @@ class FileController extends Controller
         if (Storage::disk('public')->exists( $type.'/'.$id.'.jpeg' )) return Storage::get($type.'/'.$id.'.jpeg');
         if (Storage::disk('public')->exists( $type.'/'.$id.'.png' )) return Storage::get($type.'/'.$id.'.png');
     }
+
+
     public function showAll($type)
     {
 
@@ -38,6 +40,26 @@ class FileController extends Controller
         }
         $str .= ']';
         return $str;
+    }
+    public function showAllByUser($type, $id)
+    {
+        $query = DB::table('products')
+            ->select('id')->where('userid', $id)
+            ->get();
+        $str = '[';
+        foreach ($query as $item) {
+            if ($str != '[') $str .= ', ';
+            $str .= '{"id": "'.$item->id.'", "value": "data:image/jpeg;base64,'.base64_encode($this->showOneBlob($type, $item->id)).'"}';
+        }
+        $str .= ']';
+        return $str;
+    }
+    public static function delete($type, $id)
+    {
+        if (Storage::disk('public')->exists( $type.'/'.$id.'.jpg' )) return Storage::delete($type.'/'.$id.'.jpg');
+        if (Storage::disk('public')->exists( $type.'/'.$id.'.JPG' )) return Storage::delete($type.'/'.$id.'.JPG');
+        if (Storage::disk('public')->exists( $type.'/'.$id.'.jpeg' )) return Storage::delete($type.'/'.$id.'.jpeg');
+        if (Storage::disk('public')->exists( $type.'/'.$id.'.png' )) return Storage::delete($type.'/'.$id.'.png');
     }
     public function store(Request $request)
     {

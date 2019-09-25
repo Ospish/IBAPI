@@ -36,11 +36,16 @@ Route::group(['middleware' => 'cors'], function () {
 // Get and post storage information
     Route::get('store/products/{id}', 'StoreController@getProductsById');
     Route::get('store/products', 'StoreController@getAllProducts');
+
+    Route::get('store/categories', 'StoreController@getCategories');
+    Route::post('store/categories', 'StoreController@addCategory');
+    Route::post('store/categories/{id}', 'StoreController@addSubCategory');
+
     Route::post('store/stock/-', 'StoreController@pullStocks');
     Route::post('store/stock/+', 'StoreController@pushStocks');
     Route::post('store/add/{type}', 'StoreController@addProduct');
     Route::post('store/set/{type}', 'StoreController@setProduct');
-    Route::delete('store/delete/{id}', 'StoreController@deleteProduct');
+    Route::delete('store/delete/{type}/{id}', 'StoreController@deleteProduct');
     Route::get('store/site/{id}', 'StoreController@getSiteStore');
     Route::get('store/city/{city}', 'StoreController@getStoreByCity');
 
@@ -89,9 +94,11 @@ Route::group(['middleware' => 'cors'], function () {
     Route::post('user/notify', 'NotifyController@sendNotifyEmail');
 
     Route::post('file', 'FileController@store');
+    Route::get('file/{type}', 'FileController@showAll');
     Route::get('file/{type}/{id}', 'FileController@showOne');
     Route::get('file/blob/{type}/{id}', 'FileController@showOneBlob');
-    Route::get('file/{type}', 'FileController@showAll');
+    Route::get('file/user/{type}/{id}', 'FileController@showAllByUser');
+
 //Route::get('user/{id}', function($id) {return User::find($id);});
 //Route::post('user/new', function(Request $request) {return Product::create($request->all);});
 
