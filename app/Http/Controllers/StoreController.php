@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\FileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class StoreController extends Controller
 {
+
     public function __construct()
     {
 
@@ -35,7 +37,7 @@ class StoreController extends Controller
         else {
             if ($request->price_premium == '') $request->price_premium = $request->price;
             if ($request->price_vip == '') $request->price_vip = $request->price;
-            DB::insert('insert into products_stock (created_at, updated_at, name, description, price, price_premium, price_vip)
+            DB::insert('insert into products_stock (created_at, updated_at, name, description, type, sub, price, price_premium, price_vip)
             values (
                 now(), 
                 now(), 
@@ -69,8 +71,6 @@ class StoreController extends Controller
             updated_at = now(), 
             name = "'.$request->name.'",
             description = "'.$request->description.'",
-            type = '.$request->description.',
-            sub = '.$request->description.',
             price = '.$request->price.', 
             price_premium = '.$request->price_premium.',
             price_vip = '.$request->price_vip.'
@@ -99,15 +99,18 @@ class StoreController extends Controller
         return $products;
     }
 
+
+
     public function getProduct($id)
     {
         return DB::select('select * from products where id = '.$id, [1]);
     }
 
-    public function deleteProduct($id)
+    public function deleteProduct($type, $id)
     {
         DB::delete('delete from products_stock where id = '.$id, [1]);
         DB::delete('delete from products where id = '.$id, [1]);
+        FileController::delete($type, $id);
     }
     public function getSiteStore($id)
     {
@@ -124,6 +127,38 @@ class StoreController extends Controller
         }
         $finres = call_user_func_array('array_merge', $result);
         return $finres;
+    }
+
+
+    public function getCategories(Request $request)
+    {
+        $result = [];
+        $cat_arr = DB::select('select name from categories', [1]);
+        // Looping through all categories to add subcategories
+        foreach ($cat_arr as $catid => $catname) {
+            $start = array('id' => $catid, 'name' => $catname->name, 'subs' => []);
+            $subcat_arr = DB::select('SELECT name FROM subcategories WHERE parent = '.$catid, [1]);
+            // Adding subcategories
+            foreach ($subcat_arr as $subcatid => $subcatname) {
+                array_push($start['subs'], array( 'id' => $subcatid, 'name' => $subcatname->name));
+            }
+            array_push($result, $start);
+        }
+        return $result;
+    }
+
+    public function addCategory(Request $request)
+    {
+        // Adding category
+        $query = DB::insert('INSERT INTO categories (name) VALUES ('.$request->name.')', [1]);
+        return $query;
+    }
+
+    public function addSubCategory(Request $request, $id)
+    {
+        // Adding subcategory, parent id sent in url
+        $query = DB::insert('INSERT INTO subcategories (name, parent) VALUES ("'.$request->name.'", '.$id.')', [1]);
+        return $query;
     }
 
     // STOCKS
@@ -158,6 +193,7 @@ class StoreController extends Controller
     public function deleteContent($id)
     {
         return DB::delete('delete from content where id = '.$id, [1]);
+        FileController::delete('content', $id);
     }
     public function setContent(Request $request)
     {
