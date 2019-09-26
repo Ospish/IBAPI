@@ -41,7 +41,33 @@ class FileController extends Controller
         $str .= ']';
         return $str;
     }
-    public function showAllByUser($type, $id)
+    public function showPartnerPhotos($type, $id)
+    {
+        $query = DB::table('products')
+            ->select('id')->where('userid', $id)
+            ->get();
+        $str = '[';
+        foreach ($query as $item) {
+            if ($str != '[') $str .= ', ';
+            $str .= '{"id": "'.$item->id.'", "value": "data:image/jpeg;base64,'.base64_encode($this->showOneBlob($type, $item->id)).'"}';
+        }
+        $str .= ']';
+        return $str;
+    }
+    public function showPartnersByRole()
+    {
+        $query = DB::table('users')
+            ->select('id')->where('role', '>', 1)
+            ->get();
+        $str = '[';
+        foreach ($query as $item) {
+            if ($str != '[') $str .= ', ';
+            $str .= '{"id": "'.$item->id.'", "value": "data:image/jpeg;base64,'.base64_encode($this->showOneBlob('profile', $item->id)).'"}';
+        }
+        $str .= ']';
+        return $str;
+    }
+    public function showProductsByUser($type, $id)
     {
         $query = DB::table('products')
             ->select('id')->where('userid', $id)

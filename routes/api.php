@@ -38,8 +38,12 @@ Route::group(['middleware' => 'cors'], function () {
     Route::get('store/products', 'StoreController@getAllProducts');
 
     Route::get('store/categories', 'StoreController@getCategories');
-    Route::post('store/categories', 'StoreController@addCategory');
-    Route::post('store/categories/{id}', 'StoreController@addSubCategory');
+    Route::post('store/categories/0', 'StoreController@addCategory');
+    Route::post('store/categories/1', 'StoreController@addSubCategory');
+    Route::put('store/categories/0', 'StoreController@editCategory');
+    Route::put('store/categories/1', 'StoreController@editSubCategory');
+    Route::delete('store/categories/{id}', 'StoreController@deleteCategory');
+    Route::delete('store/categories/{id}/{parent}', 'StoreController@deleteSubCategory');
 
     Route::post('store/stock/-', 'StoreController@pullStocks');
     Route::post('store/stock/+', 'StoreController@pushStocks');
@@ -71,9 +75,9 @@ Route::group(['middleware' => 'cors'], function () {
     Route::post('user/login', 'Auth\AuthController@login');
     Route::post('user/logout', 'Auth\AuthController@logout')->name('logout');
     Route::post('user/changePwd/{id}', 'Auth\AuthController@changePassword');
-
     Route::post('user/invite', 'InviteController@sendInviteLinkEmail')->name('requestInvitation');
     Route::post('user/register', 'Auth\AuthController@register')->name('register');
+
     Route::get('user/info/{id}', 'UserInfoController@getInfo');
     Route::post('user/info/{id}', 'UserInfoController@setInfo');
     Route::get('user/city', 'UserInfoController@getUserByCity');
@@ -94,10 +98,12 @@ Route::group(['middleware' => 'cors'], function () {
     Route::post('user/notify', 'NotifyController@sendNotifyEmail');
 
     Route::post('file', 'FileController@store');
-    Route::get('file/{type}', 'FileController@showAll');
-    Route::get('file/{type}/{id}', 'FileController@showOne');
-    Route::get('file/blob/{type}/{id}', 'FileController@showOneBlob');
-    Route::get('file/user/{type}/{id}', 'FileController@showAllByUser');
+    Route::get('file/all/{type}', 'FileController@showAll');
+    Route::get('file/one/{type}/{id}', 'FileController@showOne');
+
+    Route::get('file/oneblob/{type}/{id}', 'FileController@showOneBlob');
+    Route::get('file/userproducts/{type}/{id}', 'FileController@showProductsByUser');
+    Route::get('file/profile/shown', 'FileController@showPartnersByRole');
 
 //Route::get('user/{id}', function($id) {return User::find($id);});
 //Route::post('user/new', function(Request $request) {return Product::create($request->all);});

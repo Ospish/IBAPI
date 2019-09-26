@@ -115,7 +115,7 @@ class AuthController extends Controller
         DB::delete('delete from userinfo where id = '.$id, [1]);
         DB::delete('delete from social_ids where id = '.$id, [1]);
         DB::delete('delete from social_active where id = '.$id, [1]);
-        DB::delete('alter table products_stock remove column `'.$id.'`', [1]);
+        DB::delete('alter table products_stock DROP column `'.$id.'`', [1]);
 
     }
     /**
@@ -154,7 +154,7 @@ class AuthController extends Controller
     {
         return Validator::make($data, [
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8'],
+            'password' => ['required', 'min:8'],
             'invite' => ['required', 'string',
                 Rule::exists('invites')->where(function ($query) {
                     $query->where('used_at', null);

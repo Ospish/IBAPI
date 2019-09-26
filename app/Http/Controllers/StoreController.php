@@ -108,8 +108,8 @@ class StoreController extends Controller
 
     public function deleteProduct($type, $id)
     {
-        DB::delete('delete from products_stock where id = '.$id, [1]);
-        DB::delete('delete from products where id = '.$id, [1]);
+        if ($type == 'stock') DB::delete('delete from products_stock where id = '.$id, [1]);
+        if ($type == 'store') DB::delete('delete from products where id = '.$id, [1]);
         FileController::delete($type, $id);
     }
     public function getSiteStore($id)
@@ -133,14 +133,14 @@ class StoreController extends Controller
     public function getCategories(Request $request)
     {
         $result = [];
-        $cat_arr = DB::select('select name from categories', [1]);
+        $cat_arr = DB::select('select id,name from categories', [1]);
         // Looping through all categories to add subcategories
-        foreach ($cat_arr as $catid => $catname) {
-            $start = array('id' => $catid, 'name' => $catname->name, 'subs' => []);
-            $subcat_arr = DB::select('SELECT name FROM subcategories WHERE parent = '.$catid, [1]);
+        foreach ($cat_arr as $catinfo) {
+            $start = array('id' => $catinfo->id, 'name' => $catinfo->name, 'subs' => []);
+            $subcat_arr = DB::select('SELECT id, name FROM subcategories WHERE parent = '.$catinfo->id, [1]);
             // Adding subcategories
-            foreach ($subcat_arr as $subcatid => $subcatname) {
-                array_push($start['subs'], array( 'id' => $subcatid, 'name' => $subcatname->name));
+            foreach ($subcat_arr as $subcatinfo) {
+                array_push($start['subs'], array( 'id' => $subcatinfo->id, 'name' => $subcatinfo->name));
             }
             array_push($result, $start);
         }
@@ -150,16 +150,53 @@ class StoreController extends Controller
     public function addCategory(Request $request)
     {
         // Adding category
-        $query = DB::insert('INSERT INTO categories (name) VALUES ("'.$request->name.'")', [1]);
+        $query = DB::insert('INSERT INTO categories (id, name) VALUES ('.$request->id.',"'.$request->name.'")', [1]);
+        return '$query';
+    }
+    public function editCategory(Request $request)
+    {
+        DB::update('update categories set 
+            name = "'.$request->name.'"
+            where id = '.$request->id, [1]);
+        return $request->id;
+    }
+    public function addSubCategory(Request $request)
+    {
+        // Adding subcategory, parent id sent in url
+        $query = DB::insert('INSERT INTO subcategories (name, parent) VALUES ("'.$request->name.'", '.$request->id.')', [1]);
+        return '$query';
+    }
+    public function editSubCategory(Request $request)
+    {
+        DB::update('update subcategories set 
+            name = "'.$request->name.'"
+            where id = '.$request->id, [1]);
+        return $request->id;
+    }
+    public function deleteCategory($id)
+    {
+        // Deleting category
+        DB::delete('delete from categories where id = '.$id, [1]);
+        $query2 = DB::select('select id from products_stock where type = '.$id, [1]);
+        foreach ($query2 as $key => $value) {
+            $this->deleteProduct('stock', $value);
+        }
         return '$query';
     }
 
-    public function addSubCategory(Request $request, $id)
+    public function deleteSubCategory($id, $parent)
     {
-        // Adding subcategory, parent id sent in url
-        $query = DB::insert('INSERT INTO subcategories (name, parent) VALUES ("'.$request->name.'", '.$id.')', [1]);
+        // Deleting category
+        DB::delete('delete from subcategories where id = '.$id.' and parent = '.$parent, [1]);
+        $query2 = DB::select('select id from products_stock where sub = '.$id.' and type = '.$parent, [1]);
+        foreach ($query2 as $key => $value) {
+            $this->deleteProduct('stock', $value);
+        }
         return '$query';
     }
+
+
+
 
     // STOCKS
 

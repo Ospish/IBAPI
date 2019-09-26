@@ -51,7 +51,7 @@ class ShopRequestController extends Controller
             $request->value = $product->price;
             $request->posInfo_size = $product->posInfo_size;
             $request->posInfo_colors = $product->posInfo_colors;
-            $request->posInfo_boxColor = $product->posInfo_boxColor;
+            if ($product->posInfo_boxColor != '') $request->posInfo_boxColor = $product->posInfo_boxColor;
             $request->posInfo_products = '['.$request->posInfo_products.']';
         }
         DB::table('requests_shop')->insert([
