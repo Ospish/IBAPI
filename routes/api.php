@@ -100,7 +100,6 @@ Route::group(['middleware' => 'cors'], function () {
     Route::post('file', 'FileController@store');
     Route::get('file/all/{type}', 'FileController@showAll');
     Route::get('file/one/{type}/{id}', 'FileController@showOne');
-
     Route::get('file/oneblob/{type}/{id}', 'FileController@showOneBlob');
     Route::get('file/userproducts/{type}/{id}', 'FileController@showProductsByUser');
     Route::get('file/profile/shown', 'FileController@showPartnersByRole');

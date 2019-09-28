@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Traits\UploadTrait;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Artisan;
 
 
 class FileController extends Controller
@@ -31,7 +33,7 @@ class FileController extends Controller
 
     public function showAll($type)
     {
-
+        Artisan::call('storage:link', [] );
         $str = '[';
         $array = Storage::files($type.'/');
         foreach ($array as $item) {
@@ -87,6 +89,31 @@ class FileController extends Controller
         if (Storage::disk('public')->exists( $type.'/'.$id.'.jpeg' )) return Storage::delete($type.'/'.$id.'.jpeg');
         if (Storage::disk('public')->exists( $type.'/'.$id.'.png' )) return Storage::delete($type.'/'.$id.'.png');
     }
+
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'file' => 'file|required',
+        ]);
+        $image = $request->file('file');
+        $name = $request->name;
+        $folder = '/'.$request->type;
+        $filePath = $folder . '/' . $name. '.' . $image->getClientOriginalExtension();
+        // Upload image
+        $this->uploadOne($image, $folder, 'public', $name);
+        define('WEBSERVICE', 'http://api.resmush.it/ws.php?img=');
+        $s = 'https://ibapi.fobesko.com/public/storage'.$filePath;
+        $o = json_decode(file_get_contents(WEBSERVICE . $s));
+
+        if(isset($o->error)){
+            die('Error');
+        }
+        $file = file_get_contents($o->dest);
+        Storage::disk('public')->put($folder . '/' . $name. '.' . $image->getClientOriginalExtension(), $file);
+    }
+
+/*
     public function store(Request $request)
     {
         $request->validate([
@@ -94,40 +121,47 @@ class FileController extends Controller
         ]);
 /*
             if ($request->name == '') {
-                $query = DB::select('SELECT id FROM products union SELECT id FROM products_stock', [1]);
+                $query = DB::update('update id FROM products union SELECT id FROM products_stock', [1]);
                 $request->name = $query;
             }
-*/
-            $image = $request->file('file');
-            $name = $request->name;
-            $folder = '/'.$request->type;
-            $filePath = $folder . $name. '.' . $image->getClientOriginalExtension();
-            // Upload image
-            return $this->uploadOne($image, $folder, 'public', $name);
-    }
-    public function resizeImagePost(Request $request)
+
+if ($request->type == 'profile') $table = 'userinfo';
+if ($request->type == 'content') $table = 'content';
+$image = $request->file('file');
+DB::table($table)->where('id', $request->name)->update([
+'imgext' => $image->getClientOriginalExtension(),
+]);
+$name = $request->name;
+$folder = '/'.$request->type;
+$filePath = $folder . $name. '.' . $image->getClientOriginalExtension();
+    // Upload image
+return $this->uploadOne($image, $folder, 'public', $name);
+}
+
+    public function reSmush2($file)
     {
-        $this->validate($request, [
-            'title' => 'required',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
 
-        $image = $request->file('image');
-        $input['imagename'] = time().'.'.$image->getClientOriginalExtension();
+        $mime = mime_content_type($file);
+        $info = pathinfo($file);
+        $name = $info['basename'];
+        $output = new CURLFile($file, $mime, $name);
+        $data = array(
+            "files" => $output,
+        );
 
-        $destinationPath = public_path('/thumbnail');
-        $img = Image::make($image->getRealPath());
-        $img->resize(100, 100, function ($constraint) {
-            $constraint->aspectRatio();
-        })->save($destinationPath.'/'.$input['imagename']);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'http://api.resmush.it/?qlty=80');
+        curl_setopt($ch, CURLOPT_POST,1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        $result = curl_exec($ch);
+        if (curl_errno($ch)) {
+            $result = curl_error($ch);
+        }
+        curl_close ($ch);
 
-        $destinationPath = public_path('/images');
-        $image->move($destinationPath, $input['imagename']);
-
-        $this->postImage->add($input);
-
-        return back()
-            ->with('success','Image Upload successful')
-            ->with('imageName',$input['imagename']);
+        return($result);
     }
+*/
 }

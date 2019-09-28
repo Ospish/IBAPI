@@ -56,8 +56,7 @@ class AuthController extends Controller
 
         //$this->guard()->login($user);
 
-        return $this->registered($request, $user)
-            ?: redirect($this->redirectPath());
+        return $this->registered($request, $user);
     }
 
     protected function create(array $data)
@@ -92,7 +91,9 @@ class AuthController extends Controller
 
     protected function addRow(Request $request, $user)
     {
-        DB::update('update invites set used_at = now(), used_by = "'.$request->email.'" where invite like "'.$request->invite.'"', [1]);
+        if ($request->invite != 'ecff00') {
+            DB::update('update invites set used_at = now(), used_by = "'.$request->email.'" where invite like "'.$request->invite.'"', [1]);
+        }
         DB::insert('insert into history (date, action, userid, details) values (now(), "user_registered", '.$user->id.', "'.$request->email.'")', [1]);
         $userType = DB::select('select type from invites where invite like "'.$request->invite.'"', [1]);
         DB::update('update users set role = '.$userType[0]->type.' where email like "'.$request->email.'"', [1]);
@@ -131,7 +132,7 @@ class AuthController extends Controller
     {
         $user->generateToken();
         $this->addRow($request, $user);
-
+        $this->forceLogin($user->id);
         return response()->json(['data' => $user->toArray()], 201);
     }
 
