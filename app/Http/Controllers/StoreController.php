@@ -35,16 +35,20 @@ class StoreController extends Controller
                 )', [1]);
         }
         else {
+            if ($request->available == false) $request->available = 0;
+            else $request->available = 1;
             if ($request->price_premium == '') $request->price_premium = $request->price;
             if ($request->price_vip == '') $request->price_vip = $request->price;
-            DB::insert('insert into products_stock (created_at, updated_at, name, description, type, sub, price, price_premium, price_vip)
+            DB::insert('insert into products_stock (id, created_at, updated_at, name, description, type, sub, available, price, price_premium, price_vip)
             values (
+                '.$request->id.',
                 now(), 
                 now(), 
                 "'.$request->name.'", 
                 "'.$request->description.'", 
                 '.$request->type.',
                 '.$request->sub.',
+                '.$request->available.',
                 '.$request->price.', 
                 '.$request->price_premium.',
                 '.$request->price_vip.'
@@ -67,13 +71,17 @@ class StoreController extends Controller
             return $request->id;
         }
         else {
+            if ($request->available == false) $request->available = 0;
+            else $request->available = 1;
+
             DB::update('update products_stock set
             updated_at = now(), 
             name = "'.$request->name.'",
             description = "'.$request->description.'",
             price = '.$request->price.', 
             price_premium = '.$request->price_premium.',
-            price_vip = '.$request->price_vip.'
+            price_vip = '.$request->price_vip.',
+            available = '.$request->available.'
             where id = '.$request->id, [1]);
         }
         return $request->id;
@@ -82,7 +90,7 @@ class StoreController extends Controller
     public function getProductsById(Request $request, $id)
     {
         $products[0] = DB::table('products_stock')
-            ->select('id', 'name', 'description', 'type', 'sub', 'price', 'price_premium', 'price_vip', $id)
+            ->select('id', 'name', 'description', 'type', 'sub', 'price', 'available', 'price_premium', 'price_vip', $id)
             ->get();
         //$products[0] = DB::select('select id, name, desc, `'.$id.'` from products_stock', [1]);
         $products[1] = DB::select('select * from products where userid like '.$id, [1]);
@@ -92,7 +100,7 @@ class StoreController extends Controller
     public function getAllProducts(Request $request, $id)
     {
         $products[0] = DB::table('products_stock')
-            ->select('id', 'name', 'description', 'type', 'sub', 'price', 'price_premium', 'price_vip', $id)
+            ->select('id', 'name', 'description', 'type', 'sub', 'available', 'price', 'price_premium', 'price_vip', 'imgext', $id)
             ->get();
         //$products[0] = DB::select('select id, name, desc, `'.$id.'` from products_stock', [1]);
         $products[1] = DB::select('select * from products', [1]);

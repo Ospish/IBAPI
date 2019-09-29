@@ -164,7 +164,7 @@ class UserInfoController extends Controller
     public function getPartners(Request $request)
     {
         $users = DB::select('
-            SELECT users.id, users.role, users.email, userinfo.name, userinfo.city, social_ids.vk, social_ids.instagram, social_ids.telegram, social_ids.whatsapp FROM users 
+            SELECT users.id, users.role, users.email, userinfo.imgext, userinfo.name, userinfo.city, social_ids.vk, social_ids.instagram, social_ids.telegram, social_ids.whatsapp FROM users 
             LEFT OUTER JOIN userinfo ON users.id = userinfo.id
             LEFT OUTER JOIN social_ids ON users.id = social_ids.id
             WHERE users.role > 1;

@@ -96,7 +96,15 @@ class FileController extends Controller
         $request->validate([
             'file' => 'file|required',
         ]);
+        if ($request->type == 'profile') $table = 'userinfo';
+        if ($request->type == 'content') $table = 'content';
         $image = $request->file('file');
+        if (isset($table)) {
+            DB::table($table)->where('id', $request->name)->update([
+                'imgext' => $image->getClientOriginalExtension(),
+            ]);
+        }
+
         $name = $request->name;
         $folder = '/'.$request->type;
         $filePath = $folder . '/' . $name. '.' . $image->getClientOriginalExtension();
