@@ -96,6 +96,7 @@ Route::group(['middleware' => 'cors'], function () {
 
     Route::put('user/lastsale/{id}', 'UserInfoController@setLastSale');
     Route::post('user/notify', 'NotifyController@sendNotifyEmail');
+    Route::get('user/notify', 'NotifyController@sendNotifyEmail');
 
     Route::post('file', 'FileController@store');
     Route::get('file/all/{type}', 'FileController@showAll');

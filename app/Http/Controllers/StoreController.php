@@ -90,17 +90,17 @@ class StoreController extends Controller
     public function getProductsById(Request $request, $id)
     {
         $products[0] = DB::table('products_stock')
-            ->select('id', 'name', 'description', 'type', 'sub', 'price', 'available', 'price_premium', 'price_vip', $id)
+            ->select('id', 'name', 'description', 'type', 'sub', 'available', 'price', 'price_premium', 'price_vip', $id)
             ->get();
         //$products[0] = DB::select('select id, name, desc, `'.$id.'` from products_stock', [1]);
-        $products[1] = DB::select('select * from products where userid like '.$id, [1]);
+        $products[1] = DB::select('select * from products', [1]);
         return $products;
     }
 
     public function getAllProducts(Request $request, $id)
     {
         $products[0] = DB::table('products_stock')
-            ->select('id', 'name', 'description', 'type', 'sub', 'available', 'price', 'price_premium', 'price_vip', 'imgext', $id)
+            ->select('id', 'name', 'description', 'type', 'sub', 'available', 'price', 'price_premium', 'price_vip', $id)
             ->get();
         //$products[0] = DB::select('select id, name, desc, `'.$id.'` from products_stock', [1]);
         $products[1] = DB::select('select * from products', [1]);
