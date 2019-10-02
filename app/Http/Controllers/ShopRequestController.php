@@ -46,13 +46,12 @@ class ShopRequestController extends Controller
             'action' => "request_added"
         ]);
         if ($request->type == 0) {
-            $product = DB::table('products')->select()->where('id', $request->posInfo_products)->first();
+            $product = DB::table('products')->select()->where('id', json_decode($request->posInfo_products)[0])->first();
             $request->posInfo_flowers = $product->posInfo_flowers;
             $request->value = $product->price;
             $request->posInfo_size = $product->posInfo_size;
             $request->posInfo_colors = $product->posInfo_colors;
             if ($product->posInfo_boxColor != '') $request->posInfo_boxColor = $product->posInfo_boxColor;
-            $request->posInfo_products = '['.$request->posInfo_products.']';
         }
         DB::table('requests_shop')->insert([
             'created_at' => now(),

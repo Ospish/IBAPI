@@ -116,6 +116,8 @@ class StoreController extends Controller
 
     public function deleteProduct($type, $id)
     {
+        if ($type == 0) $type = 'stock';
+        if ($type == 1) $type = 'store';
         if ($type == 'stock') DB::delete('delete from products_stock where id = '.$id, [1]);
         if ($type == 'store') DB::delete('delete from products where id = '.$id, [1]);
         FileController::delete($type, $id);

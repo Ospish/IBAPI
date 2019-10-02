@@ -22,6 +22,7 @@ class FileController extends Controller
         if (Storage::disk('public')->exists( $type.'/'.$id.'.jpeg' )) return 'data:image/jpeg;base64,'.base64_encode(Storage::get($type.'/'.$id.'.jpeg'));
         if (Storage::disk('public')->exists( $type.'/'.$id.'.png' )) return 'data:image/png;base64,'.base64_encode(Storage::get($type.'/'.$id.'.png'));
     }
+
     public function showOneBlob($type, $id)
     {
         if (Storage::disk('public')->exists( $type.'/'.$id.'.jpg' )) return Storage::get($type.'/'.$id.'.jpg');
@@ -29,7 +30,6 @@ class FileController extends Controller
         if (Storage::disk('public')->exists( $type.'/'.$id.'.jpeg' )) return Storage::get($type.'/'.$id.'.jpeg');
         if (Storage::disk('public')->exists( $type.'/'.$id.'.png' )) return Storage::get($type.'/'.$id.'.png');
     }
-
 
     public function showAll($type)
     {
@@ -43,6 +43,7 @@ class FileController extends Controller
         $str .= ']';
         return $str;
     }
+
     public function showPartnerPhotos($type, $id)
     {
         $query = DB::table('products')
@@ -56,6 +57,7 @@ class FileController extends Controller
         $str .= ']';
         return $str;
     }
+
     public function showPartnersByRole()
     {
         $query = DB::table('users')
@@ -69,6 +71,7 @@ class FileController extends Controller
         $str .= ']';
         return $str;
     }
+
     public function showProductsByUser($type, $id)
     {
         $query = DB::table('products')
@@ -82,6 +85,7 @@ class FileController extends Controller
         $str .= ']';
         return $str;
     }
+
     public static function delete($type, $id)
     {
         if (Storage::disk('public')->exists( $type.'/'.$id.'.jpg' )) return Storage::delete($type.'/'.$id.'.jpg');
@@ -89,7 +93,6 @@ class FileController extends Controller
         if (Storage::disk('public')->exists( $type.'/'.$id.'.jpeg' )) return Storage::delete($type.'/'.$id.'.jpeg');
         if (Storage::disk('public')->exists( $type.'/'.$id.'.png' )) return Storage::delete($type.'/'.$id.'.png');
     }
-
 
     public function store(Request $request)
     {
@@ -115,7 +118,7 @@ class FileController extends Controller
         $o = json_decode(file_get_contents(WEBSERVICE . $s));
 
         if(isset($o->error)){
-            die('Error');
+            echo('Error');
         }
         $file = file_get_contents($o->dest);
         Storage::disk('public')->put($folder . '/' . $name. '.' . $image->getClientOriginalExtension(), $file);
