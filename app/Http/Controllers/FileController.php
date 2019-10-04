@@ -114,11 +114,11 @@ class FileController extends Controller
         // Upload image
         $this->uploadOne($image, $folder, 'public', $name);
         define('WEBSERVICE', 'http://api.resmush.it/ws.php?img=');
-        $s = 'https://ibapi.fobesko.com/public/storage'.$filePath;
+        $s = 'https://api.inbloomshop.ru/public/storage'.$filePath;
         $o = json_decode(file_get_contents(WEBSERVICE . $s));
 
         if(isset($o->error)){
-            echo('Error');
+            die('Error');
         }
         $file = file_get_contents($o->dest);
         Storage::disk('public')->put($folder . '/' . $name. '.' . $image->getClientOriginalExtension(), $file);

@@ -31,7 +31,9 @@ $cellstyle = 'border-bottom-color:#333333;border-bottom-style:solid;border-botto
                               <td style="{{ $cellstyle }} white-space:nowrap;">{{ $costs[$loop->index] * $quantity[$loop->index] }} RUB</td>
                           </tr>
                       @endforeach
-                      <tr><th></th><th></th><th></th><th></th><th style="padding:5px 10px 5px 10px;text-align:left;">Сумма: </th><th style="padding:5px 10px 5px 10px;text-align:left;">{{ $value }} RUB</th></tr>
+                      @if ($type == 2)
+                        <tr><th></th><th></th><th></th><th></th><th style="padding:5px 10px 5px 10px;text-align:left;">Сумма: </th><th style="padding:5px 10px 5px 10px;text-align:left;">{{ $value }} RUB</th></tr>
+                      @endif
                   @else
                       <tr>
                           <th style="{{ $cellstyle }}">#</th>

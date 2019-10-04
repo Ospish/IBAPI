@@ -66,6 +66,30 @@ class NotifyController extends Controller
             $m->from('info@inbloomshop.ru', 'Inbloom');
             $m->to($email, 'name')->subject('Новая заявка');
         });
+        if ($request->type != 2) {
+            $email = $request->posInfo_email;
+            Mail::send('note', [
+                'name' => $request->posInfo_name,
+                'email' => $request->posInfo_email,
+                'size' => $request->posInfo_size,
+                'boxcolor' => $colors[$request->posInfo_boxColor],
+                'quantity' => json_decode($request->posInfo_quantity),
+                'productNames' => $products2,
+                'productIds' => json_decode($request->posInfo_products),
+                'costs' => $costs2,
+                'phone' => $request->phone,
+                'value' => $request->value,
+                'type' => $request->type,
+                'city' => $request->city,
+                'geo' => $request->geo,
+                'date' => $request->receiveDate,
+                'congrats' => $request->congrats,
+            ],
+            function ($m) use ($email) {
+                $m->from('info@inbloomshop.ru', 'Inbloom');
+                $m->to($email, 'name')->subject('Новая заявка');
+            });
+        }
     }
 
     public function sendNotifyEmail(Request $request)
