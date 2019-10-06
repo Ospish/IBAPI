@@ -29,7 +29,7 @@ class InviteController extends Controller
     public function sendInviteLinkEmail(Request $request)
     {
         $token = $this->generateInvitationToken($request->email);
-        DB::insert('insert into invites (created_at, invite, type) values (now(), "'.$token.'", '.$request->type.')', [1]);
+        DB::insert('insert into invites (created_at, invite, type, email) values (now(), "'.$token.'", '.$request->type.', "'.$request->email.'")', [1]);
         $this->validateEmail($request);
         $this->sendInviteLink($request->email, $token, $request->type);
     }

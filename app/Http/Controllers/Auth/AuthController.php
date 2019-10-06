@@ -14,6 +14,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Intervention\Image\Response;
 
 class AuthController extends Controller
 {
@@ -46,11 +47,16 @@ class AuthController extends Controller
      * Handle a registration request for the application.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return string
      */
     public function register(Request $request)
     {
-        $this->validator($request->all())->validate();
+        $validator = $this->validateReg($request->all());
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            return response($errors->first(), 422)
+                ->header('Content-Type', 'text/plain');
+        }
 
         event(new Registered($user = $this->create($request->all())));
 
@@ -67,7 +73,37 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Where to redirect users after registration.
+     *
+     * @var string
+     */
+    protected $redirectTo = '/home';
 
+
+    /**
+     * Get a validator for an incoming registration request.
+     *
+     * @param  array  $data
+     * @return \Illuminate\Contracts\Validation\Validator
+     */
+    protected function validateReg(array $data)
+    {
+        return Validator::make($data, [
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'min:8'],
+            'invite' => ['required', 'string',
+                Rule::exists('invites')->where(function ($query) use($data)  {
+                    $query->where([
+                        ['used_at', null],
+                        ['email', $data['email']],
+                    ]);
+                })],
+        ], $messages = [
+            'exists' => 'Неверный код приглашения!',
+            'email.unique' => 'Такой email уже используется!',
+        ]);
+    }
 
     protected function attemptLogin(Request $request)
     {
@@ -92,7 +128,7 @@ class AuthController extends Controller
     protected function addRow(Request $request, $user)
     {
         if ($request->invite != 'ecff00') {
-            DB::update('update invites set used_at = now(), used_by = "'.$request->email.'" where invite like "'.$request->invite.'"', [1]);
+            DB::update('update invites set used_at = now() where invite like "'.$request->invite.'"', [1]);
         }
         DB::insert('insert into history (date, action, userid, details) values (now(), "user_registered", '.$user->id.', "'.$request->email.'")', [1]);
         $userType = DB::select('select type from invites where invite like "'.$request->invite.'"', [1]);
@@ -137,35 +173,14 @@ class AuthController extends Controller
     }
 
 
-    /**
-     * Where to redirect users after registration.
-     *
-     * @var string
-     */
-    protected $redirectTo = '/home';
 
-
-    /**
-     * Get a validator for an incoming registration request.
-     *
-     * @param  array  $data
-     * @return \Illuminate\Contracts\Validation\Validator
-     */
-    protected function validator(array $data)
-    {
-        return Validator::make($data, [
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'min:8'],
-            'invite' => ['required', 'string',
-                Rule::exists('invites')->where(function ($query) {
-                    $query->where('used_at', null);
-                })],
-        ]);
-    }
 
     /**
      * Create a new user instance after a valid registration.
-     *
+    ([
+    ['used_at', null],
+    ['mail', data['mail']],
+    ])
      * @param  array  $data
      * @return \App\User
      */

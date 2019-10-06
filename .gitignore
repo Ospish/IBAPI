@@ -13,3 +13,4 @@ yarn-error.log
 /app/Http/Controllers/Auth/LoginController.php.bak
 /public/phpMyAdmin/
 /storage/
+/app/Http/Controllers/Auth/LoginController2.php.bak
