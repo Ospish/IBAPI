@@ -19,41 +19,38 @@ class StoreController extends Controller
     public function addProduct(Request $request, $type)
     {
         if ($type == 1) {
-            DB::insert('insert into products (id, created_at, updated_at, name, posInfo_size, posInfo_flowers, posInfo_colors, posInfo_boxColor, description, price, userid)
-        values (
-                '.$request->id.',
-                now(), 
-                now(), 
-                "'.$request->name.'", 
-                "'.$request->posInfo_size.'",
-                "'.$request->posInfo_flowers.'",
-                "'.$request->posInfo_colors.'",
-                "'.$request->posInfo_boxColor.'",
-                "'.$request->description.'", 
-                '.$request->price.',
-                '.$request->userid.'
-                )', [1]);
+            $id = DB::table('products_stock')->insertGetId([
+                'created_at' => now(),
+                'updated_at' => now(),
+                'name' => "$request->name",
+                'posInfo_size' => "$request->posInfo_size",
+                'posInfo_flowers' =>  $request->posInfo_flowers,
+                'posInfo_colors' =>  $request->posInfo_colors,
+                'posInfo_boxColor' =>  $request->posInfo_boxColor,
+                'description' =>  $request->description,
+                'price' => $request->price,
+                'userid' => $request->userid
+            ]);
         }
         else {
             if ($request->available == false) $request->available = 0;
             else $request->available = 1;
             if ($request->price_premium == '') $request->price_premium = $request->price;
             if ($request->price_vip == '') $request->price_vip = $request->price;
-            DB::insert('insert into products_stock (id, created_at, updated_at, name, description, type, sub, available, price, price_premium, price_vip)
-            values (
-                '.$request->id.',
-                now(), 
-                now(), 
-                "'.$request->name.'", 
-                "'.$request->description.'", 
-                '.$request->type.',
-                '.$request->sub.',
-                '.$request->available.',
-                '.$request->price.', 
-                '.$request->price_premium.',
-                '.$request->price_vip.'
-                )', [1]);
+            $id = DB::table('products_stock')->insertGetId([
+                'created_at' => now(),
+                'updated_at' => now(),
+                'name' => "$request->name",
+                'description' => "$request->description",
+                'type' =>  $request->type,
+                'sub' =>  $request->sub,
+                'available' =>  $request->available,
+                'price' => $request->price,
+                'price_premium' => $request->price_premium,
+                'price_vip' => $request->price_vip
+            ]);
         }
+        return $id;
     }
     public function setProduct(Request $request, $type)
     {
@@ -90,7 +87,7 @@ class StoreController extends Controller
     public function getProductsById(Request $request, $id)
     {
         $products[0] = DB::table('products_stock')
-            ->select('id', 'name', 'description', 'type', 'sub', 'available', 'price', 'price_premium', 'price_vip', $id)
+            ->select('id', 'name', 'description', 'type', 'sub', 'available', 'price', 'price_premium', 'price_vip', 'imgext', $id)
             ->get();
         //$products[0] = DB::select('select id, name, desc, `'.$id.'` from products_stock', [1]);
         $products[1] = DB::select('select * from products', [1]);
@@ -100,7 +97,7 @@ class StoreController extends Controller
     public function getAllProducts(Request $request, $id)
     {
         $products[0] = DB::table('products_stock')
-            ->select('id', 'name', 'description', 'type', 'sub', 'available', 'price', 'price_premium', 'price_vip', $id)
+            ->select('id', 'name', 'description', 'type', 'sub', 'available', 'price', 'price_premium', 'price_vip', 'imgext', $id)
             ->get();
         //$products[0] = DB::select('select id, name, desc, `'.$id.'` from products_stock', [1]);
         $products[1] = DB::select('select * from products', [1]);
@@ -188,7 +185,7 @@ class StoreController extends Controller
         // Deleting category
         DB::delete('delete from categories where id = '.$id, [1]);
         $query2 = DB::select('select id from products_stock where type = '.$id, [1]);
-        foreach ($query2 as $key => $value) {
+        foreach ($query2[0] as $key => $value) {
             $this->deleteProduct('stock', $value);
         }
         return '$query';
@@ -199,7 +196,7 @@ class StoreController extends Controller
         // Deleting category
         DB::delete('delete from subcategories where id = '.$id.' and parent = '.$parent, [1]);
         $query2 = DB::select('select id from products_stock where sub = '.$id.' and type = '.$parent, [1]);
-        foreach ($query2 as $key => $value) {
+        foreach ($query2[0] as $key => $value) {
             $this->deleteProduct('stock', $value);
         }
         return '$query';

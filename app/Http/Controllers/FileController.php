@@ -101,6 +101,8 @@ class FileController extends Controller
         ]);
         if ($request->type == 'profile') $table = 'userinfo';
         if ($request->type == 'content') $table = 'content';
+        if ($request->type == 'stock') $table = 'products';
+        if ($request->type == 'stock') $table = 'products_stock';
         $image = $request->file('file');
         if (isset($table)) {
             DB::table($table)->where('id', $request->name)->update([
