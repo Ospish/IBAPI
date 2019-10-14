@@ -19,7 +19,7 @@ class StoreController extends Controller
     public function addProduct(Request $request, $type)
     {
         if ($type == 1) {
-            $id = DB::table('products_stock')->insertGetId([
+            $id = DB::table('products')->insertGetId([
                 'created_at' => now(),
                 'updated_at' => now(),
                 'name' => "$request->name",
