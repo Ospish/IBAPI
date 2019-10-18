@@ -22,6 +22,7 @@ class UserInfoController extends Controller
         patronymic = "'.$request->patronymic.'",  
         corp_email = "'.$request->corp_email.'",
         phone = "'.$request->phone.'",
+        countrycode = "'.$request->countrycode.'",
         city = "'.$request->city.'",
         street = "'.$request->street.'",
         building = "'.$request->building.'",
